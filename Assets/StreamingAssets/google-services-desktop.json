@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "345916682366",
+    "firebase_url": "https://unity-task2-search-default-rtdb.firebaseio.com",
+    "project_id": "unity-task2-search",
+    "storage_bucket": "unity-task2-search.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:345916682366:android:4219b67f984bec738f282f",
+        "android_client_info": {
+          "package_name": "com.AdeebKids.UnityDevTask2_SearchDiscovery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwiaWJaFb_T1-hMJn_j3uTg4uM64kk7YM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
