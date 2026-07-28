@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8909305682716212125}
   - component: {fileID: 8878340561625525679}
   - component: {fileID: 5831348003736035918}
+  - component: {fileID: 76112267843529351}
   m_Layer: 5
   m_Name: Name
   m_TagString: Untagged
@@ -79,6 +80,20 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: New Text
+--- !u!114 &76112267843529351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 269293466542579597}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 084dbf9341d36fd4db9dfa21081c1cf3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FixArabic3DText
+  showTashkeel: 1
+  useHinduNumbers: 1
 --- !u!1 &4294372678962845478
 GameObject:
   m_ObjectHideFlags: 0
@@ -263,6 +278,7 @@ GameObject:
   - component: {fileID: 7043999970381058563}
   - component: {fileID: 2555409728451469879}
   - component: {fileID: 3765665719788266820}
+  - component: {fileID: 4189326086197534025}
   m_Layer: 5
   m_Name: Author
   m_TagString: Untagged
@@ -331,3 +347,17 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: New Text
+--- !u!114 &4189326086197534025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6791323635647029856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 084dbf9341d36fd4db9dfa21081c1cf3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FixArabic3DText
+  showTashkeel: 1
+  useHinduNumbers: 1
