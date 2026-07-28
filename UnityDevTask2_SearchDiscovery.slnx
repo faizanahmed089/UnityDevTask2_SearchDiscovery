@@ -1,4 +1,3 @@
 ﻿<Solution>
-  <Project Path="Firebase.App.Internal.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
 </Solution>

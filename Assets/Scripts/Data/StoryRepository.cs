@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Firebase.Database;
-using Firebase.Extensions;
+using Newtonsoft.Json.Linq;
+using UnityEngine.Networking;
 using StoryLibrary.Events;
 using StoryLibrary.Models;
 using StoryLibrary.Parsing;
@@ -10,25 +10,27 @@ using StoryLibrary.Parsing;
 namespace StoryLibrary.Data
 {
     /// <summary>
-    /// Model layer: owns the connection to Firebase, retrieval, parsing, and
-    /// an in-memory cache. This is the only class that talks to Firebase —
-    /// everything else (Controller, Views) only ever sees List&lt;StoryItem&gt;.
+    /// Model layer: talks to Firebase Realtime Database over its plain REST API
+    /// (UnityWebRequest), not the native Firebase Unity SDK. The official SDK
+    /// does not support WebGL at all (only iOS/Android/tvOS/Desktop), so REST
+    /// is the approach that actually works on every platform, including the
+    /// WebGL build this task requires. Caches results in memory for the session.
     /// </summary>
     public class StoryRepository
     {
-        private DatabaseReference _dbRoot;
+        // Your Realtime Database URL, from the Firebase console's Realtime
+        // Database page (top of the page, looks like:
+        // "https://your-project-id-default-rtdb.firebaseio.com" or
+        // "...-default-rtdb.<region>.firebasedatabase.app").
+        // No trailing slash.
+        private const string DatabaseUrl = "https://unity-task2-search-default-rtdb.firebaseio.com/";
+
         private List<StoryItem> _cache;
         public bool IsLoaded => _cache != null;
 
-        public StoryRepository()
-        {
-            _dbRoot = FirebaseDatabase.DefaultInstance.RootReference;
-        }
-
         /// <summary>
-        /// Fetches the whole StoryLibrary node once, parses every CoverInfo,
-        /// and caches the result in memory for the session so repeat searches
-        /// (and re-opening the search page) don't re-hit the network.
+        /// Fetches the whole StoryLibary node once via a single REST GET,
+        /// parses every CoverInfo, and caches the result for the session.
         /// </summary>
         public async Task<List<StoryItem>> LoadAllAsync(bool forceRefresh = false)
         {
@@ -37,33 +39,36 @@ namespace StoryLibrary.Data
 
             StoryEvents.RaiseLoadStarted();
 
-            try
+            string url = $"{DatabaseUrl}/StoryLibary.json";
+
+            using (var request = UnityWebRequest.Get(url))
             {
-                DataSnapshot snapshot = await _dbRoot.Child("StoryLibary").GetValueAsync();
+                var operation = request.SendWebRequest();
+                while (!operation.isDone)
+                    await Task.Yield();
 
-                var results = new List<StoryItem>(capacity: (int)(snapshot.ChildrenCount));
-
-                foreach (var storyNode in snapshot.Children)
+                if (request.result != UnityWebRequest.Result.Success)
                 {
-                    string id = storyNode.Key;
-                    var storyChild = storyNode.Child("Story");
-                    if (storyChild == null || !storyChild.Exists) continue;
+                    StoryEvents.RaiseLoadFailed(request.error);
+                    throw new Exception(request.error);
+                }
 
-                    // The CoverInfo key is prefixed with the story id, e.g. "71726852CoverInfo"
-                    var coverInfoChild = storyChild.Child(id + "CoverInfo");
-                    string raw = coverInfoChild.Exists ? coverInfoChild.Value?.ToString() : null;
+                var results = new List<StoryItem>();
+                JObject root = JObject.Parse(request.downloadHandler.text);
 
+                foreach (var storyEntry in root.Properties())
+                {
+                    string id = storyEntry.Name;
+                    JToken storyNode = storyEntry.Value["Story"];
+                    if (storyNode == null) continue;
+
+                    string raw = storyNode[id + "CoverInfo"]?.ToString();
                     results.Add(CoverInfoParser.Parse(id, raw));
                 }
 
                 _cache = results;
                 StoryEvents.RaiseLoadCompleted(results.Count);
                 return results;
-            }
-            catch (Exception ex)
-            {
-                StoryEvents.RaiseLoadFailed(ex.Message);
-                throw;
             }
         }
 
