@@ -15,10 +15,6 @@ namespace StoryLibrary.Controllers
         private StoryRepository _repository;
         private SearchIndex _index;
 
-        private float _debounceTimer;
-        private string _pendingQuery;
-        private const float DebounceSeconds = 0.25f; // avoid re-searching every keystroke
-
         private async void Awake()
         {
             _repository = new StoryRepository();
@@ -32,28 +28,10 @@ namespace StoryLibrary.Controllers
             _index.Build(items);
         }
 
-        /// <summary>Call this from the input field's OnValueChanged.</summary>
-        public void OnQueryChanged(string query)
-        {
-            _pendingQuery = query;
-            _debounceTimer = DebounceSeconds;
-        }
-
-        /// <summary>Call this directly from the Search button's OnClick for an immediate search.</summary>
+        /// <summary>Call this from the Search button's OnClick (or Enter key) for an explicit search.</summary>
         public void OnSearchButtonPressed(string query)
         {
             RunSearch(query);
-        }
-
-        private void Update()
-        {
-            if (_debounceTimer <= 0f) return;
-
-            _debounceTimer -= Time.deltaTime;
-            if (_debounceTimer <= 0f)
-            {
-                RunSearch(_pendingQuery);
-            }
         }
 
         private void RunSearch(string query)

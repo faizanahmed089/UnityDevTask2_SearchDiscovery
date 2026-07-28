@@ -38,8 +38,14 @@ namespace StoryLibrary.Views
             StoryEvents.OnLoadFailed += HandleLoadFailed;
             StoryEvents.OnSearchResults += HandleSearchResults;
 
-            queryInput.onValueChanged.AddListener(controller.OnQueryChanged);
+            // Search fires on button click, or when the user presses Enter —
+            // NOT on every keystroke, per the task's "Input field + Search button" flow.
             searchButton.onClick.AddListener(() => controller.OnSearchButtonPressed(queryInput.text));
+            queryInput.onEndEdit.AddListener(text =>
+            {
+                if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+                    controller.OnSearchButtonPressed(text);
+            });
         }
 
         private void OnDisable()
