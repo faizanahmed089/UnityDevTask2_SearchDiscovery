@@ -1,3 +1,4 @@
+using ArabicSupport;
 using StoryLibrary.Models;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,8 +14,14 @@ namespace StoryLibrary.Views
 
         public void Bind(StoryItem item)
         {
-            nameLabel.text = item.ContentName;
-            authorLabel.text = string.IsNullOrEmpty(item.Author) ? "Unknown author" : item.Author;
+            // Fixed every time Bind() runs (i.e. every time this pooled card is
+            // reused for a new item) — NOT once in Start(), which only ever
+            // catches whatever text happened to be set the very first time.
+            nameLabel.text = ArabicFixer.Fix(item.ContentName, showTashkeel: true, useHinduNumbers: false);
+
+            string author = string.IsNullOrEmpty(item.Author) ? "Unknown author" : item.Author;
+            authorLabel.text = ArabicFixer.Fix(author, showTashkeel: true, useHinduNumbers: false);
+
             dateLabel.text = item.Date.HasValue
                 ? item.Date.Value.ToString("dd MMM yyyy")
                 : "Date unavailable";
