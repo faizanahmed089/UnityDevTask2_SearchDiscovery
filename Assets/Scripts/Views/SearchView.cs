@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ArabicSupport;
 using StoryLibrary.Controllers;
 using StoryLibrary.Events;
 using StoryLibrary.Models;
@@ -31,6 +32,12 @@ namespace StoryLibrary.Views
 
         private readonly List<ResultCardView> _pool = new List<ResultCardView>();
 
+        // Tracks the last raw (unshaped) query and what we displayed for it,
+        // so pressing Search twice in a row doesn't try to re-shape text that
+        // was already shaped last time (ArabicFixer.Fix isn't safe to apply twice).
+        private string _lastRawQuery = "";
+        private string _lastShapedDisplay = "";
+
         private void OnEnable()
         {
             StoryEvents.OnLoadStarted += HandleLoadStarted;
@@ -40,11 +47,11 @@ namespace StoryLibrary.Views
 
             // Search fires on button click, or when the user presses Enter —
             // NOT on every keystroke, per the task's "Input field + Search button" flow.
-            searchButton.onClick.AddListener(() => controller.OnSearchButtonPressed(queryInput.text));
-            queryInput.onEndEdit.AddListener(text =>
+            searchButton.onClick.AddListener(RunSearchFromInput);
+            queryInput.onEndEdit.AddListener(_ =>
             {
                 if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-                    controller.OnSearchButtonPressed(text);
+                    RunSearchFromInput();
             });
         }
 
@@ -54,6 +61,26 @@ namespace StoryLibrary.Views
             StoryEvents.OnLoadCompleted -= HandleLoadCompleted;
             StoryEvents.OnLoadFailed -= HandleLoadFailed;
             StoryEvents.OnSearchResults -= HandleSearchResults;
+        }
+
+        private void RunSearchFromInput()
+        {
+            string currentText = queryInput.text;
+
+            // If the field still shows exactly what we shaped last time (the
+            // user hasn't typed/pasted anything new), reuse the original raw
+            // query rather than treating the already-shaped text as raw input.
+            string rawQuery = currentText == _lastShapedDisplay ? _lastRawQuery : currentText;
+
+            controller.OnSearchButtonPressed(rawQuery);
+
+            string shaped = string.IsNullOrEmpty(rawQuery)
+                ? ""
+                : ArabicFixer.Fix(rawQuery, showTashkeel: true, useHinduNumbers: false);
+
+            _lastRawQuery = rawQuery;
+            _lastShapedDisplay = shaped;
+            queryInput.text = shaped;
         }
 
         private void HandleLoadStarted()
