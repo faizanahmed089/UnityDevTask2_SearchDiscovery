@@ -14,7 +14,7 @@ public class FixArabic3DText : MonoBehaviour {
 
         string fixedText = ArabicFixer.Fix(text.text, showTashkeel, useHinduNumbers);
 
-        gameObject.GetComponent<Text>().text = fixedText;
+        text.text = fixedText;
 
 		Debug.Log(fixedText);
     }
